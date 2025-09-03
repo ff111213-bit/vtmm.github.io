@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ภารกิจคิดเป็นขั้นตอน! (อัลกอริทึม)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-image: url('https://templatecaiflash.com/canva/bgalgorithm.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        
+        .bounce-animation {
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .step-item {
+            transition: all 0.3s ease;
+            cursor: grab;
+        }
+        
+        .step-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        
+        .step-item.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+        
+        .drop-zone {
+            transition: all 0.3s ease;
+            border: 2px dashed #cbd5e0;
+        }
+        
+        .drop-zone.drag-over {
+            border-color: #4299e1;
+            background-color: rgba(66, 153, 225, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .drop-zone.filled {
+            border-color: #48bb78;
+            background-color: rgba(72, 187, 120, 0.1);
+        }
+        
+        .success-animation {
+            animation: successPulse 0.6s ease-in-out;
+        }
+        
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .progress-bar {
+            transition: width 1s linear;
+        }
+        
+        .trophy-animation {
+            animation: trophyFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes trophyFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-10px) rotate(2deg); }
+            50% { transform: translateY(-5px) rotate(0deg); }
+            75% { transform: translateY(-8px) rotate(-2deg); }
+        }
+        
+        .sparkle {
+            animation: sparkle 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- หน้าแรก -->
+    <div id="homePage" class="min-h-screen flex flex-col items-center justify-center p-4">
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-8 max-w-2xl w-full text-center">
+            <!-- โลโก้และชื่อเกม -->
+            <div class="mb-8">
+                <img src="https://templatecaiflash.com/canva/logoTemplate.png" alt="Logo" class="w-24 h-24 mx-auto mb-4 bounce-animation" onerror="this.src=''; this.alt='🎯'; this.style.fontSize='4rem';">
+                <h1 class="text-4xl font-bold text-blue-600 mb-2">ภารกิจคิดเป็นขั้นตอน!</h1>
+                <h2 class="text-2xl font-semibold text-purple-600">(อัลกอริทึม)</h2>
+                <p class="text-lg text-gray-600 mt-4">ฝึกให้เด็ก คิดเป็นขั้นตอน, เรียงลำดับเหตุการณ์, และเข้าใจแนวคิด "ก่อน-หลัง"</p>
+            </div>
+            
+            <!-- วิธีการเล่น -->
+            <div class="bg-blue-50 rounded-2xl p-6 mb-6 text-left">
+                <h3 class="text-xl font-bold text-blue-700 mb-3 flex items-center">
+                    <span class="text-2xl mr-2">📋</span> วิธีการเล่น
+                </h3>
+                <ul class="space-y-2 text-gray-700">
+                    <li class="flex items-start"><span class="text-blue-500 mr-2">•</span>ลากขั้นตอนต่างๆ ไปวางในช่องตามลำดับที่ถูกต้อง</li>
+                    <li class="flex items-start"><span class="text-blue-500 mr-2">•</span>แต่ละข้อมีเวลา 1 นาที</li>
+                    <li class="flex items-start"><span class="text-blue-500 mr-2">•</span>ตอบถูก = 20 คะแนน + โบนัสเวลา (วินาทีละ 5 คะแนน)</li>
+                    <li class="flex items-start"><span class="text-blue-500 mr-2">•</span>รวม 10 ข้อ สุ่มมาให้เล่น</li>
+                </ul>
+            </div>
+            
+            <!-- ฟอร์มข้อมูล -->
+            <div class="space-y-4 mb-6">
+                <div class="flex items-center space-x-3">
+                    <span class="text-2xl">👤</span>
+                    <input type="text" id="studentName" placeholder="ชื่อ-สกุล" class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none">
+                </div>
+                <div class="flex space-x-4">
+                    <div class="flex items-center space-x-3 flex-1">
+                        <span class="text-2xl">🏫</span>
+                        <input type="text" id="studentClass" placeholder="ชั้น" class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none">
+                    </div>
+                    <div class="flex items-center space-x-3 flex-1">
+                        <span class="text-2xl">🔢</span>
+                        <input type="number" id="studentNumber" placeholder="เลขที่" class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ปุ่มเริ่มเกม -->
+            <button onclick="startGame()" class="bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-4 rounded-2xl text-xl font-bold pulse-animation hover:from-green-600 hover:to-blue-600 transition-all duration-300 flex items-center justify-center mx-auto space-x-3">
+                <span class="text-2xl">🎮</span>
+                <span>เริ่มเล่นเกม</span>
+                <span class="text-2xl">🚀</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- หน้าเล่นเกม -->
+    <div id="gamePage" class="hidden min-h-screen p-4">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header เกม -->
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-4 mb-4 flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <h2 class="text-2xl font-bold text-blue-600">ข้อที่ <span id="currentQuestion">1</span>/10</h2>
+                    <div class="text-lg font-semibold text-purple-600">คะแนน: <span id="totalScore">0</span></div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-lg font-semibold text-orange-600">เวลา: <span id="timeLeft">60</span> วินาที</div>
+                    <div class="w-32 h-4 bg-gray-200 rounded-full overflow-hidden">
+                        <div id="progressBar" class="h-full bg-gradient-to-r from-green-500 to-red-500 progress-bar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- เนื้อหาโจทย์ -->
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 mb-4">
+                <div class="text-center mb-6">
+                    <img id="questionImage" src="" alt="" class="w-32 h-32 mx-auto mb-4 rounded-2xl shadow-lg" onerror="this.src=''; this.alt='📝'; this.style.fontSize='4rem'; this.style.display='flex'; this.style.alignItems='center'; this.style.justifyContent='center';">
+                    <h3 id="questionTitle" class="text-2xl font-bold text-gray-800 mb-2"></h3>
+                </div>
+            </div>
+
+            <!-- พื้นที่เล่นเกม -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- ฝั่งซ้าย: ขั้นตอนที่ต้องลาก -->
+                <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6">
+                    <h4 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <span class="text-2xl mr-2">📦</span> ขั้นตอนต่างๆ
+                    </h4>
+                    <div id="stepsContainer" class="space-y-3">
+                        <!-- ขั้นตอนจะถูกสร้างที่นี่ -->
+                    </div>
+                </div>
+
+                <!-- ฝั่งขวา: ช่องสำหรับวาง -->
+                <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6">
+                    <h4 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <span class="text-2xl mr-2">🎯</span> เรียงลำดับที่นี่
+                    </h4>
+                    <div id="dropZones" class="space-y-3">
+                        <!-- ช่องวางจะถูกสร้างที่นี่ -->
+                    </div>
+                    <div class="flex space-x-3 mt-6">
+                        <button onclick="resetAnswer()" class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-xl text-lg font-bold hover:from-orange-600 hover:to-red-600 transition-all duration-300">
+                            รีเซ็ต 🔄
+                        </button>
+                        <button onclick="checkAnswer()" class="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl text-lg font-bold hover:from-purple-600 hover:to-pink-600 transition-all duration-300">
+                            ตรวจคำตอบ ✨
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- หน้าสรุปคะแนน -->
+    <div id="resultPage" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 max-w-2xl w-full text-center">
+            <div class="mb-8">
+                <div class="text-8xl mb-4 trophy-animation">🏆</div>
+                <div class="absolute top-20 left-1/2 transform -translate-x-1/2">
+                    <div class="sparkle text-yellow-400 text-2xl">✨</div>
+                </div>
+                <h2 class="text-3xl font-bold text-yellow-600 mb-4">สรุปผลคะแนน</h2>
+            </div>
+            
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-6">
+                <div class="grid grid-cols-2 gap-4 text-left">
+                    <div><strong>ชื่อ-สกุล:</strong> <span id="resultName"></span></div>
+                    <div><strong>ชั้น:</strong> <span id="resultClass"></span></div>
+                    <div><strong>เลขที่:</strong> <span id="resultNumber"></span></div>
+                    <div><strong>เวลาที่ใช้:</strong> <span id="totalTime"></span> วินาที</div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-green-100 rounded-xl p-4">
+                    <div class="text-3xl text-green-600 mb-2">✅</div>
+                    <div class="text-lg font-bold text-green-700">ตอบถูก</div>
+                    <div class="text-2xl font-bold text-green-800" id="correctCount">0</div>
+                </div>
+                <div class="bg-red-100 rounded-xl p-4">
+                    <div class="text-3xl text-red-600 mb-2">❌</div>
+                    <div class="text-lg font-bold text-red-700">ตอบผิด</div>
+                    <div class="text-2xl font-bold text-red-800" id="wrongCount">0</div>
+                </div>
+            </div>
+            
+            <div class="bg-yellow-100 rounded-xl p-4 mb-6">
+                <div class="text-lg font-bold text-yellow-700 mb-2">คะแนนรวม</div>
+                <div class="text-4xl font-bold text-yellow-800" id="finalScore">0</div>
+                <div class="text-sm text-yellow-600">คะแนน</div>
+            </div>
+            
+            <button onclick="restartGame()" class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-3 rounded-xl text-lg font-bold hover:from-blue-600 hover:to-purple-600 transition-all duration-300">
+                เล่นใหม่ 🔄
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal แจ้งเตือน -->
+    <div id="alertModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 max-w-md mx-4 text-center">
+            <div class="text-4xl mb-4" id="alertIcon">⚠️</div>
+            <div class="text-lg font-semibold mb-4" id="alertMessage"></div>
+            <button onclick="closeAlert()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                ตกลง
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ข้อมูลโจทย์
+        const questions = [
+            {
+                title: "อัลกอริทึมการอาบน้ำ",
+                image: "https://templatecaiflash.com/canva/algorithm/1.png",
+                steps: [
+                    { text: "เตรียมอุปกรณ์อาบน้ำ", icon: "🧴" },
+                    { text: "เปิดน้ำอุ่น/เย็น", icon: "🚿" },
+                    { text: "ทำตัวให้เปียก", icon: "💧" },
+                    { text: "ถูสบู่ให้ทั่วร่างกาย", icon: "🧼" },
+                    { text: "ล้างตัวให้สะอาด", icon: "🚿" },
+                    { text: "เช็ดตัวให้แห้ง", icon: "🏃" }
+                ]
+            },
+            {
+                title: "อัลกอริทึมการเปิดใช้งานโปรแกรม Paint",
+                image: "https://templatecaiflash.com/canva/algorithm/2.png",
+                steps: [
+                    { text: "เปิดเครื่องคอมพิวเตอร์", icon: "💻" },
+                    { text: "คลิกที่ปุ่ม Start", icon: "▶️" },
+                    { text: "เลือกเมนู All Programs", icon: "📁" },
+                    { text: "เลือกโฟลเดอร์ Accessories", icon: "🔧" },
+                    { text: "คลิกที่โปรแกรม Paint", icon: "🎨" },
+                    { text: "เริ่มใช้งานโปรแกรม", icon: "✨" }
+                ]
+            },
+            {
+                title: "อัลกอริทึมการรดน้ำต้นไม้",
+                image: "https://templatecaiflash.com/canva/algorithm/3.png",
+                steps: [
+                    { text: "เตรียมบัวรดน้ำ", icon: "🪣" },
+                    { text: "เติมน้ำให้เต็ม", icon: "💧" },
+                    { text: "เดินไปที่ต้นไม้", icon: "🚶" },
+                    { text: "รดน้ำที่โคนต้นไม้", icon: "🌱" },
+                    { text: "ตรวจสอบว่าดินชุ่มพอแล้ว", icon: "👀" },
+                    { text: "เก็บบัวรดน้ำ", icon: "🪣" }
+                ]
+            },
+            {
+                title: "อัลกอริทึมการทำการบ้าน",
+                image: "https://templatecaiflash.com/canva/algorithm/4.png",
+                steps: [
+                    { text: "เตรียมหนังสือและสมุด", icon: "📚" },
+                    { text: "อ่านโจทย์ให้เข้าใจ", icon: "👀" },
+                    { text: "คิดคำตอบ", icon: "🤔" },
+                    { text: "เขียนคำตอบลงสมุด", icon: "✏️" },
+                    { text: "ตรวจสอบความถูกต้อง", icon: "✅" },
+                    { text: "จัดเก็บการบ้านไว้ในกระเป๋า", icon: "🎒" }
+                ]
+            },
+            {
+                title: "อัลกอริทึมการทำความสะอาดบ้าน",
+                image: "https://templatecaiflash.com/canva/algorithm/5.png",
+                steps: [
+                    { text: "เตรียมอุปกรณ์ทำความสะอาด", icon: "🧹" },
+                    { text: "เก็บของใช้ให้เป็นระเบียบ", icon: "📦" },
+                    { text: "กวาดหยักไย่ เช็ดฝุ่นตามโต๊ะ เก้าอี้ และชั้นวางของ", icon: "🪶" },
+                    { text: "กวาดพื้นให้สะอาด", icon: "🧹" },
+                    { text: "ถูพื้นให้ทั่วทุกห้อง", icon: "🧽" },
+                    { text: "เก็บอุปกรณ์และทิ้งขยะ", icon: "🗑️" }
+                ]
+            },
+            {
+                title: "อัลกอริทึมการทอดไข่เจียว",
+                image: "https://templatecaiflash.com/canva/algorithm/6.png",
+                steps: [
+                    { text: "ตอกไข่ใส่ถ้วย", icon: "🥚" },
+                    { text: "เติมเครื่องปรุง (เช่น น้ำปลา/ซอส/ต้นหอม)", icon: "🧂" },
+                    { text: "ตีไข่ให้เข้ากัน", icon: "🥄" },
+                    { text: "เทน้ำมันใส่กระทะและตั้งไฟ", icon: "🔥" },
+                    { text: "เทไข่ลงกระทะเมื่อร้อน", icon: "🍳" },
+                    { text: "ทอดจนสุกทั้งสองด้าน แล้วตักขึ้นใส่จาน", icon: "🍽️" }
+                ]
+            },
+            {
+                title: "อัลกอริทึมแต่งตัวไปโรงเรียน",
+                image: "https://templatecaiflash.com/canva/algorithm/7.png",
+                steps: [
+                    { text: "ตื่นนอนและเก็บที่นอน", icon: "🛏️" },
+                    { text: "ล้างหน้า /แปรงฟัน/อาบน้ำ", icon: "🪥" },
+                    { text: "ใส่เสื้อและกางเกง/กระโปรงนักเรียน", icon: "👕" },
+                    { text: "เตรียมกระเป๋านักเรียน", icon: "🎒" },
+                    { text: "ใส่ถุงเท้าและรองเท้านักเรียน", icon: "👟" },
+                    { text: "เตรียมตัวออกจากบ้าน", icon: "🚪" }
+                ]
+            },
+            {
+                title: "อัลกอริทึมการซื้อขนมที่ 7-Eleven",
+                image: "https://templatecaiflash.com/canva/algorithm/8.png",
+                steps: [
+                    { text: "เตรียมเงินให้พร้อม", icon: "💰" },
+                    { text: "เดินเข้าร้าน 7-Eleven", icon: "🏪" },
+                    { text: "เลือกขนมที่ต้องการ", icon: "🍪" },
+                    { text: "นำขนมไปที่แคชเชียร์", icon: "🛒" },
+                    { text: "จ่ายเงินและรับเงินทอน (ถ้ามี)", icon: "💳" },
+                    { text: "รับขนมและใบเสร็จ แล้วออกจากร้าน", icon: "🧾" }
+                ]
+            },
+            {
+                title: "อัลกอริทึมการเปิดคอมพิวเตอร์",
+                image: "https://templatecaiflash.com/canva/algorithm/9.png",
+                steps: [
+                    { text: "เสียบปลั๊กคอมพิวเตอร์", icon: "🔌" },
+                    { text: "กดปุ่มเปิดเครื่อง / เปิดหน้าจอ", icon: "⚡" },
+                    { text: "รอจนหน้าจอเริ่มทำงาน", icon: "⏳" },
+                    { text: "ใส่รหัสผ่าน (ถ้ามี)", icon: "🔐" },
+                    { text: "แสดงหน้าจอ Desktop", icon: "🖥️" },
+                    { text: "เปิดโปรแกรมที่ต้องการใช้งาน", icon: "📱" }
+                ]
+            },
+            {
+                title: "อัลกอริทึมการต้มบะหมี่กึ่งสำเร็จรูป",
+                image: "https://templatecaiflash.com/canva/algorithm/10.png",
+                steps: [
+                    { text: "ต้มน้ำในหม้อให้เดือด", icon: "🔥" },
+                    { text: "แกะซองบะหมี่และเตรียมเครื่องปรุง", icon: "📦" },
+                    { text: "ใส่เส้นบะหมี่ลงในหม้อน้ำเดือด", icon: "🍜" },
+                    { text: "ต้มประมาณ 2-3 นาทีให้เส้นนุ่ม", icon: "⏰" },
+                    { text: "ใส่เครื่องปรุงลงไปแล้วคนให้เข้ากัน", icon: "🥄" },
+                    { text: "ปิดเตาและตักใส่ชามพร้อมทาน", icon: "🍽️" }
+                ]
+            }
+        ];
+
+        // ตัวแปรเกม
+        let currentQuestionIndex = 0;
+        let shuffledQuestions = [];
+        let score = 0;
+        let correctAnswers = 0;
+        let wrongAnswers = 0;
+        let timeLeft = 60;
+        let timer;
+        let gameStartTime;
+        let questionStartTime;
+        let playerAnswers = [];
+        let currentAnswer = [];
+
+        // ฟังก์ชันเริ่มเกม
+        function startGame() {
+            const name = document.getElementById('studentName').value.trim();
+            const studentClass = document.getElementById('studentClass').value.trim();
+            const number = document.getElementById('studentNumber').value.trim();
+
+            if (!name || !studentClass || !number) {
+                showAlert('⚠️', 'กรุณากรอกข้อมูลให้ครบถ้วน');
+                return;
+            }
+
+            // สุ่มคำถาม
+            shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+            
+            // รีเซ็ตค่า
+            currentQuestionIndex = 0;
+            score = 0;
+            correctAnswers = 0;
+            wrongAnswers = 0;
+            playerAnswers = [];
+            gameStartTime = Date.now();
+
+            // แสดงหน้าเกม
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('gamePage').classList.remove('hidden');
+            
+            loadQuestion();
+        }
+
+        // ฟังก์ชันโหลดคำถาม
+        function loadQuestion() {
+            if (currentQuestionIndex >= shuffledQuestions.length) {
+                endGame();
+                return;
+            }
+
+            const question = shuffledQuestions[currentQuestionIndex];
+            currentAnswer = [];
+            
+            // อัพเดทหน้าจอ
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalScore').textContent = score;
+            document.getElementById('questionTitle').textContent = question.title;
+            document.getElementById('questionImage').src = question.image;
+            
+            // สร้างขั้นตอนแบบสุ่ม
+            const shuffledSteps = [...question.steps].sort(() => Math.random() - 0.5);
+            createSteps(shuffledSteps);
+            createDropZones();
+            
+            // เริ่มจับเวลา
+            timeLeft = 60;
+            questionStartTime = Date.now();
+            startTimer();
+        }
+
+        // ฟังก์ชันสร้างขั้นตอน
+        function createSteps(steps) {
+            const container = document.getElementById('stepsContainer');
+            container.innerHTML = '';
+            
+            steps.forEach((step, index) => {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'step-item bg-gradient-to-r from-blue-100 to-purple-100 p-4 rounded-xl border-2 border-blue-200 flex items-center space-x-3';
+                stepDiv.draggable = true;
+                stepDiv.dataset.stepText = step.text;
+                stepDiv.innerHTML = `
+                    <span class="text-2xl">${step.icon}</span>
+                    <span class="font-medium text-gray-800">${step.text}</span>
+                `;
+                
+                stepDiv.addEventListener('dragstart', handleDragStart);
+                stepDiv.addEventListener('dragend', handleDragEnd);
+                
+                container.appendChild(stepDiv);
+            });
+        }
+
+        // ฟังก์ชันสร้างช่องวาง
+        function createDropZones() {
+            const container = document.getElementById('dropZones');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 6; i++) {
+                const dropZone = document.createElement('div');
+                dropZone.className = 'drop-zone min-h-16 p-4 rounded-xl flex items-center justify-center text-gray-500 font-medium';
+                dropZone.dataset.position = i;
+                dropZone.innerHTML = `<span class="text-lg">ขั้นตอนที่ ${i + 1}</span>`;
+                
+                dropZone.addEventListener('dragover', handleDragOver);
+                dropZone.addEventListener('drop', handleDrop);
+                dropZone.addEventListener('dragleave', handleDragLeave);
+                
+                container.appendChild(dropZone);
+            }
+        }
+
+        // ฟังก์ชัน Drag and Drop
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.stepText);
+            e.target.classList.add('dragging');
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.target.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.target.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const stepText = e.dataTransfer.getData('text/plain');
+            const position = parseInt(e.target.dataset.position);
+            
+            e.target.classList.remove('drag-over');
+            
+            // ถ้าช่องนี้มีคำตอบอยู่แล้ว ให้นำกลับไปที่เดิม
+            if (currentAnswer[position]) {
+                returnStepToOriginal(currentAnswer[position]);
+            }
+            
+            e.target.classList.add('filled');
+            
+            // หาไอคอนที่ตรงกัน
+            const question = shuffledQuestions[currentQuestionIndex];
+            const step = question.steps.find(s => s.text === stepText);
+            
+            e.target.innerHTML = `
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="returnStepFromDropZone(${position})">
+                    <span class="text-2xl">${step.icon}</span>
+                    <span class="font-medium text-gray-800">${stepText}</span>
+                    <span class="text-red-500 hover:text-red-700 ml-2">❌</span>
+                </div>
+            `;
+            
+            currentAnswer[position] = stepText;
+            
+            // ซ่อนขั้นตอนที่ถูกลาก
+            const stepElements = document.querySelectorAll('.step-item');
+            stepElements.forEach(el => {
+                if (el.dataset.stepText === stepText) {
+                    el.style.display = 'none';
+                }
+            });
+        }
+
+        // ฟังก์ชันจับเวลา
+        function startTimer() {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timeLeft').textContent = timeLeft;
+                
+                const progress = (timeLeft / 60) * 100;
+                document.getElementById('progressBar').style.width = progress + '%';
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    checkAnswer();
+                }
+            }, 1000);
+        }
+
+        // ฟังก์ชันตรวจคำตอบ
+        function checkAnswer() {
+            clearInterval(timer);
+            
+            // ตรวจสอบว่าใส่ครบหรือไม่
+            if (currentAnswer.filter(Boolean).length < 6) {
+                showAlert('⚠️', 'ยังใส่ขั้นตอนไม่ครบ กรุณาลากขั้นตอนให้ครบทั้ง 6 ขั้นตอน');
+                startTimer();
+                return;
+            }
+            
+            const question = shuffledQuestions[currentQuestionIndex];
+            const correctOrder = question.steps.map(step => step.text);
+            
+            let isCorrect = true;
+            for (let i = 0; i < 6; i++) {
+                if (currentAnswer[i] !== correctOrder[i]) {
+                    isCorrect = false;
+                    break;
+                }
+            }
+            
+            let questionScore = 0;
+            if (isCorrect) {
+                questionScore = 20 + (timeLeft * 5); // 20 คะแนนพื้นฐาน + โบนัสเวลา
+                score += questionScore;
+                correctAnswers++;
+                showAlert('🎉', `ถูกต้อง! ได้ ${questionScore} คะแนน`);
+            } else {
+                wrongAnswers++;
+                showAlert('😊', 'ไม่ถูกต้อง แต่ไม่เป็นไร ลองใหม่ในข้อต่อไป!');
+            }
+            
+            playerAnswers.push({
+                question: question.title,
+                correct: isCorrect,
+                score: questionScore,
+                timeUsed: 60 - timeLeft
+            });
+            
+            setTimeout(() => {
+                currentQuestionIndex++;
+                loadQuestion();
+            }, 2000);
+        }
+
+        // ฟังก์ชันจบเกม
+        function endGame() {
+            const totalTime = Math.floor((Date.now() - gameStartTime) / 1000);
+            
+            document.getElementById('gamePage').classList.add('hidden');
+            document.getElementById('resultPage').classList.remove('hidden');
+            
+            // แสดงผลลัพธ์
+            document.getElementById('resultName').textContent = document.getElementById('studentName').value;
+            document.getElementById('resultClass').textContent = document.getElementById('studentClass').value;
+            document.getElementById('resultNumber').textContent = document.getElementById('studentNumber').value;
+            document.getElementById('totalTime').textContent = totalTime;
+            document.getElementById('correctCount').textContent = correctAnswers;
+            document.getElementById('wrongCount').textContent = wrongAnswers;
+            document.getElementById('finalScore').textContent = score;
+        }
+
+        // ฟังก์ชันเริ่มเกมใหม่
+        function restartGame() {
+            document.getElementById('resultPage').classList.add('hidden');
+            document.getElementById('homePage').classList.remove('hidden');
+            
+            // รีเซ็ตฟอร์ม
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentClass').value = '';
+            document.getElementById('studentNumber').value = '';
+        }
+
+        // ฟังก์ชันแสดง Alert
+        function showAlert(icon, message) {
+            document.getElementById('alertIcon').textContent = icon;
+            document.getElementById('alertMessage').textContent = message;
+            document.getElementById('alertModal').classList.remove('hidden');
+        }
+
+        function closeAlert() {
+            document.getElementById('alertModal').classList.add('hidden');
+        }
+
+        // ฟังก์ชันรีเซ็ตคำตอบทั้งหมด
+        function resetAnswer() {
+            // ล้างคำตอบทั้งหมด
+            currentAnswer = [];
+            
+            // รีเซ็ตช่องวาง
+            const dropZones = document.querySelectorAll('.drop-zone');
+            dropZones.forEach((zone, index) => {
+                zone.classList.remove('filled');
+                zone.innerHTML = `<span class="text-lg">ขั้นตอนที่ ${index + 1}</span>`;
+            });
+            
+            // แสดงขั้นตอนทั้งหมดกลับมา
+            const stepElements = document.querySelectorAll('.step-item');
+            stepElements.forEach(el => {
+                el.style.display = 'flex';
+            });
+        }
+
+        // ฟังก์ชันนำขั้นตอนกลับไปที่เดิม
+        function returnStepToOriginal(stepText) {
+            const stepElements = document.querySelectorAll('.step-item');
+            stepElements.forEach(el => {
+                if (el.dataset.stepText === stepText) {
+                    el.style.display = 'flex';
+                }
+            });
+        }
+
+        // ฟังก์ชันลบขั้นตอนจากช่องวาง
+        function returnStepFromDropZone(position) {
+            const stepText = currentAnswer[position];
+            if (stepText) {
+                // นำขั้นตอนกลับไปที่เดิม
+                returnStepToOriginal(stepText);
+                
+                // ล้างช่องวาง
+                const dropZone = document.querySelector(`[data-position="${position}"]`);
+                dropZone.classList.remove('filled');
+                dropZone.innerHTML = `<span class="text-lg">ขั้นตอนที่ ${position + 1}</span>`;
+                
+                // ล้างคำตอบ
+                currentAnswer[position] = null;
+            }
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96e4dd979260ee41',t:'MTc1NTA1MzAxNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
